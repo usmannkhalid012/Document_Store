@@ -4,111 +4,120 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
+
 <script type="module">
   import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
   const SUPABASE_URL = "https://sguhhxzqsyyquvdrnymn.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNndWhoeHpxc3l5cXV2ZHJueW1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA3OTYsImV4cCI6MjA5MTM5Njc5Nn0.BI9xJGVhIiZfyo8ZWtshIKNcqbVjkE074XlbvD4xa3c"; // replace with your anon key
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNndWhoeHpxc3l5cXV2ZHJueW1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA3OTYsImV4cCI6MjA5MTM5Njc5Nn0.BI9xJGVhIiZfyo8ZWtshIKNcqbVjkE074XlbvD4xa3c";
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  window.supabase = supabase; // optional, for global access
+  window.supabase = supabase;
 </script>
+
 <script src="https://cdn.tailwindcss.com"></script>
+
 <style>
 body {
   background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('download.jpg') center/cover no-repeat fixed;
-  min-height: 100vh;
 }
 .glass {
-  background: rgba(255,255,255,0.88);
+  background: rgba(255,255,255,0.9);
   backdrop-filter: blur(8px);
   padding: 16px;
   border-radius: 12px;
 }
 </style>
 </head>
-<body class="p-6 min-h-screen">
 
-<div class="flex flex-col md:flex-row items-center justify-between mb-6">
-  <h1 class="text-white text-3xl font-bold mb-4 md:mb-0">Dashboard</h1>
-  <div class="flex items-center gap-2">
+<body class="p-6">
+
+<!-- HEADER -->
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-white text-3xl font-bold">Dashboard</h1>
+  <div class="flex gap-3 items-center">
     <span id="userEmail" class="text-white"></span>
     <button id="logoutBtn" class="bg-red-600 text-white px-3 py-2 rounded">Logout</button>
   </div>
 </div>
 
+<!-- MAIN -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-  <!-- Documents -->
+
+  <!-- DOCUMENTS -->
   <div class="glass">
     <h2 class="font-semibold mb-3">📄 Documents</h2>
-    <input id="docUpload" type="file" accept=".pdf,.txt,.doc,.docx" class="mb-2 w-full"/>
-    <textarea id="docDesc" placeholder="Description (optional)" class="w-full border p-2 rounded mb-2"></textarea>
-    <button id="uploadDoc" class="bg-blue-600 text-white px-3 py-2 rounded w-full">Upload Document</button>
-    <div id="docsList" class="mt-4 grid gap-3"></div>
+    <input id="docUpload" type="file" class="w-full mb-2">
+    <textarea id="docDesc" placeholder="Description" class="w-full border p-2 rounded mb-2"></textarea>
+    <button id="uploadDoc" class="bg-blue-600 text-white w-full py-2 rounded">Upload</button>
+    <div id="docsList" class="mt-4"></div>
   </div>
 
-  <!-- Images -->
+  <!-- IMAGES -->
   <div class="glass">
     <h2 class="font-semibold mb-3">🖼 Images</h2>
-    <input id="imgUpload" type="file" accept="image/*" class="mb-2 w-full"/>
-    <textarea id="imgDesc" placeholder="Description (optional)" class="w-full border p-2 rounded mb-2"></textarea>
-    <button id="uploadImg" class="bg-green-600 text-white px-3 py-2 rounded w-full">Upload Image</button>
-    <div id="imagesList" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+    <input id="imgUpload" type="file" accept="image/*" class="w-full mb-2">
+    <textarea id="imgDesc" placeholder="Description" class="w-full border p-2 rounded mb-2"></textarea>
+    <button id="uploadImg" class="bg-green-600 text-white w-full py-2 rounded">Upload</button>
+    <div id="imagesList" class="mt-4 grid grid-cols-2 gap-3"></div>
   </div>
 
-  <!-- Videos -->
+  <!-- VIDEOS -->
   <div class="glass">
     <h2 class="font-semibold mb-3">🎥 Videos</h2>
-    <input id="vidUpload" type="file" accept="video/*" class="mb-2 w-full"/>
-    <textarea id="vidDesc" placeholder="Description (optional)" class="w-full border p-2 rounded mb-2"></textarea>
-    <button id="uploadVid" class="bg-purple-600 text-white px-3 py-2 rounded w-full">Upload Video</button>
-    <div id="videosList" class="mt-4 grid gap-3"></div>
+    <input id="vidUpload" type="file" accept="video/*" class="w-full mb-2">
+    <textarea id="vidDesc" placeholder="Description" class="w-full border p-2 rounded mb-2"></textarea>
+    <button id="uploadVid" class="bg-purple-600 text-white w-full py-2 rounded">Upload</button>
+    <div id="videosList" class="mt-4"></div>
   </div>
+
 </div>
 
-<div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
-  <div class="bg-white rounded-xl p-4 max-w-3xl w-full relative">
-    <button id="closePreview" class="absolute right-3 top-3 text-red-600 text-2xl">✖</button>
+<!-- PREVIEW MODAL -->
+<div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center p-4">
+  <div class="bg-white p-4 rounded relative max-w-3xl w-full">
+    <button id="closePreview" class="absolute top-2 right-3 text-red-600 text-xl">✖</button>
     <div id="previewContent"></div>
   </div>
 </div>
 
 <script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const supabase = window.supabase;
 
-// ---------- AUTH GUARD ----------
-let user = null;
-(async function init() {
+let user;
+
+// AUTH
+(async () => {
   const { data } = await supabase.auth.getSession();
   user = data.session?.user;
-  if (!user) return window.location.href = "login.html";
-  document.getElementById("userEmail").innerText = user.email;
-  await loadFiles();
+  if (!user) return location.href = "login.html";
+
+  userEmail.innerText = user.email;
+  loadFiles();
 })();
 
-// ---------- LOGOUT ----------
-document.getElementById("logoutBtn").onclick = async () => {
+// LOGOUT
+logoutBtn.onclick = async () => {
   await supabase.auth.signOut();
-  window.location.href = "login.html";
+  location.href = "login.html";
 };
 
-// ---------- UPLOAD ----------
-async function handleUpload(type, fileInput, descInput) {
-  if (!user) return;
-  if (!fileInput.files.length) return alert("Select a file");
+// UPLOAD
+async function upload(type, fileInput, descInput) {
+  if (!fileInput.files.length) return alert("Select file");
 
   const file = fileInput.files[0];
   const path = `${user.id}/${Date.now()}-${file.name}`;
 
-  const { error: uploadError } = await supabase.storage.from("user_files").upload(path, file, { upsert: true });
-  if (uploadError) return alert(uploadError.message);
+  const { error } = await supabase.storage.from("user_files").upload(path, file);
+  if (error) return alert(error.message);
 
   const { data } = supabase.storage.from("user_files").getPublicUrl(path);
+
   await supabase.from("files").insert({
     user_id: user.id,
     name: file.name,
-    description: descInput.value || "",
+    description: descInput.value,
     type,
     path,
     url: data.publicUrl
@@ -116,37 +125,44 @@ async function handleUpload(type, fileInput, descInput) {
 
   fileInput.value = "";
   descInput.value = "";
-  await loadFiles();
+  loadFiles();
 }
 
-document.getElementById("uploadDoc").onclick = () => handleUpload("document", docUpload, docDesc);
-document.getElementById("uploadImg").onclick = () => handleUpload("image", imgUpload, imgDesc);
-document.getElementById("uploadVid").onclick = () => handleUpload("video", vidUpload, vidDesc);
+uploadDoc.onclick = () => upload("document", docUpload, docDesc);
+uploadImg.onclick = () => upload("image", imgUpload, imgDesc);
+uploadVid.onclick = () => upload("video", vidUpload, vidDesc);
 
-// ---------- LOAD FILES ----------
+// LOAD FILES
 async function loadFiles() {
-  if (!user) return;
-  const { data: rows, error } = await supabase.from("files").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-  if (error) return alert(error.message);
+  const { data } = await supabase.from("files")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
 
   docsList.innerHTML = imagesList.innerHTML = videosList.innerHTML = "";
 
-  rows.forEach(row => {
+  data.forEach(row => {
     const card = document.createElement("div");
-    card.className = "bg-white p-2 rounded shadow";
+    card.className = "bg-white p-2 rounded shadow mb-2";
 
+    // CONTENT
     if (row.type === "image") {
       const img = document.createElement("img");
       img.src = row.url;
-      img.className = "w-full h-40 object-cover rounded cursor-pointer";
-      img.onclick = () => openPreview("image", row.url);
+      img.className = "h-40 w-full object-cover rounded cursor-pointer";
+      img.onclick = (e) => {
+        e.stopPropagation();
+        openPreview("image", row.url);
+      };
       card.appendChild(img);
+
     } else if (row.type === "video") {
       const vid = document.createElement("video");
       vid.src = row.url;
-      vid.className = "w-full h-40 rounded cursor-pointer";
+      vid.className = "h-40 w-full rounded cursor-pointer";
       vid.onclick = () => openPreview("video", row.url);
       card.appendChild(vid);
+
     } else {
       const p = document.createElement("p");
       p.innerText = row.name;
@@ -155,33 +171,44 @@ async function loadFiles() {
       card.appendChild(p);
     }
 
+    // DESC
     const desc = document.createElement("p");
     desc.innerText = row.description;
-    desc.className = "text-gray-600 text-sm mt-2";
+    desc.className = "text-sm text-gray-600 mt-2";
     card.appendChild(desc);
 
+    // ACTIONS
     const actions = document.createElement("div");
     actions.className = "flex gap-2 mt-2";
 
+    // DOWNLOAD FIX
     const dl = document.createElement("button");
     dl.innerText = "Download";
-    dl.className = "bg-blue-600 text-white px-2 py-1 text-sm rounded";
-    dl.onclick = () => {
+    dl.className = "bg-blue-600 text-white px-2 py-1 rounded";
+
+    dl.onclick = async () => {
+      const res = await fetch(row.url);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+
       const a = document.createElement("a");
-      a.href = row.url;
+      a.href = url;
       a.download = row.name;
       document.body.appendChild(a);
       a.click();
       a.remove();
+      URL.revokeObjectURL(url);
     };
 
+    // DELETE
     const del = document.createElement("button");
     del.innerText = "Delete";
-    del.className = "bg-red-600 text-white px-2 py-1 text-sm rounded";
+    del.className = "bg-red-600 text-white px-2 py-1 rounded";
+
     del.onclick = async () => {
       await supabase.storage.from("user_files").remove([row.path]);
       await supabase.from("files").delete().eq("id", row.id);
-      await loadFiles();
+      loadFiles();
     };
 
     actions.appendChild(dl);
@@ -194,19 +221,34 @@ async function loadFiles() {
   });
 }
 
-// ---------- PREVIEW ----------
+// PREVIEW
 function openPreview(type, url) {
-  const previewContent = document.getElementById("previewContent");
-  previewContent.innerHTML = type === "image"
-    ? `<img src="${url}" class="w-full rounded">`
-    : type === "video"
-      ? `<video src="${url}" class="w-full rounded" controls autoplay></video>`
-      : `<iframe src="${url}" class="w-full h-[70vh] rounded border"></iframe>`;
-  document.getElementById("previewModal").classList.remove("hidden");
+  previewContent.innerHTML =
+    type === "image"
+      ? `<img src="${url}" class="w-full rounded">`
+      : type === "video"
+      ? `<video src="${url}" controls autoplay class="w-full"></video>`
+      : `<iframe src="${url}" class="w-full h-[70vh]"></iframe>`;
+
+  previewModal.classList.remove("hidden");
 }
-document.getElementById("closePreview").onclick = () => {
-  document.getElementById("previewModal").classList.add("hidden");
+
+// CLOSE MODAL
+closePreview.onclick = () => previewModal.classList.add("hidden");
+
+// CLICK OUTSIDE CLOSE
+previewModal.onclick = (e) => {
+  if (e.target.id === "previewModal") {
+    previewModal.classList.add("hidden");
+  }
 };
+
+// ESC CLOSE
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    previewModal.classList.add("hidden");
+  }
+});
 </script>
 
 </body>
