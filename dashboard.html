@@ -8,7 +8,7 @@
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-const SUPABASE_URL = "https://sguhhxzqsyyquvdrnymn.supabase.co";
+const SUPABASE_URL = "https://YOUR_PROJECT.supabase.co";
 const SUPABASE_KEY = "YOUR_ANON_KEY"; // ❗ NEVER use sb_secret_
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -121,10 +121,32 @@ document.getElementById("logoutBtn").onclick = async () => {
   window.location.href = "login.html";
 };
 
-/* ---------- UPLOAD ---------- */
+/* ---------- FIXED UPLOAD HANDLERS ---------- */
+document.getElementById("uploadImg").onclick = () =>
+  uploadFile(
+    "image",
+    document.getElementById("imgUpload"),
+    document.getElementById("imgDesc")
+  );
+
+document.getElementById("uploadVid").onclick = () =>
+  uploadFile(
+    "video",
+    document.getElementById("vidUpload"),
+    document.getElementById("vidDesc")
+  );
+
+document.getElementById("uploadDoc").onclick = () =>
+  uploadFile(
+    "document",
+    document.getElementById("docUpload"),
+    document.getElementById("docDesc")
+  );
+
+/* ---------- UPLOAD FUNCTION ---------- */
 async function uploadFile(type, input, descInput) {
   const file = input.files[0];
-  if (!file) return alert("Select file");
+  if (!file) return alert("Select a file");
 
   const path = `${user.id}/${Date.now()}-${file.name}`;
 
@@ -132,7 +154,10 @@ async function uploadFile(type, input, descInput) {
     .from("user_files")
     .upload(path, file);
 
-  if (error) return alert(error.message);
+  if (error) {
+    console.log(error);
+    return alert(error.message);
+  }
 
   const { data } = supabase.storage
     .from("user_files")
@@ -149,14 +174,10 @@ async function uploadFile(type, input, descInput) {
 
   input.value = "";
   descInput.value = "";
+
   loadFiles();
+  alert("Upload successful ✅");
 }
-
-document.getElementById("uploadImg").onclick = () =>
-  uploadFile("image", imgUpload, imgDesc);
-
-document.getElementById("uploadVid").onclick = () =>
-  uploadFile("video", vidUpload, vidDesc);
 
 /* ---------- LOAD FILES ---------- */
 async function loadFiles() {
@@ -168,6 +189,7 @@ async function loadFiles() {
 
   imagesList.innerHTML = "";
   videosList.innerHTML = "";
+  docsList.innerHTML = "";
 
   data.forEach(row => {
     const card = document.createElement("div");
@@ -190,6 +212,15 @@ async function loadFiles() {
       card.appendChild(vid);
       videosList.appendChild(card);
     }
+
+    if (row.type === "document") {
+      const p = document.createElement("p");
+      p.innerText = row.name;
+      p.className = "font-semibold cursor-pointer";
+      p.onclick = () => window.open(row.url, "_blank");
+      card.appendChild(p);
+      docsList.appendChild(card);
+    }
   });
 }
 
@@ -209,10 +240,9 @@ function openModal(type, url) {
 
 function closeModal() {
   modal.classList.add("hidden");
-  content.innerHTML = ""; // stop video
+  content.innerHTML = "";
 }
 
-/* CLOSE EVENTS */
 closeBtn.addEventListener("click", closeModal);
 
 modal.addEventListener("click", (e) => {
