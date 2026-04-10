@@ -225,10 +225,12 @@ async function loadFiles() {
 function openPreview(type, url) {
   previewContent.innerHTML =
     type === "image"
-      ? `<img src="${url}" class="w-full rounded">`
+      ? `<div class="flex justify-center items-center">
+           <img src="${url}" class="max-h-[80vh] max-w-full object-contain rounded shadow">
+         </div>`
       : type === "video"
-      ? `<video src="${url}" controls autoplay class="w-full"></video>`
-      : `<iframe src="${url}" class="w-full h-[70vh]"></iframe>`;
+      ? `<video src="${url}" controls autoplay class="max-h-[80vh] w-full rounded"></video>`
+      : `<iframe src="${url}" class="w-full h-[80vh] rounded border"></iframe>`;
 
   previewModal.classList.remove("hidden");
 }
