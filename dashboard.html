@@ -8,18 +8,19 @@
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-const SUPABASE_URL = "https://YOUR_PROJECT.supabase.co";
-const SUPABASE_KEY = "YOUR_ANON_KEY"; // ❗ NEVER use secret key
+// ✅ ALWAYS use ANON KEY (NOT secret)
+const SUPABASE_URL = "https://sguhhxzqsyyquvdrnymn.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNndWhoeHpxc3l5cXV2ZHJueW1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA3OTYsImV4cCI6MjA5MTM5Njc5Nn0.BI9xJGVhIiZfyo8ZWtshIKNcqbVjkE074XlbvD4xa3c";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-window.supabase = supabase;
+window.supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 </script>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
 body {
-  background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('download.jpg') center/cover no-repeat fixed;
+  background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+  url('download.jpg') center/cover no-repeat fixed;
   min-height: 100vh;
 }
 .glass {
@@ -33,95 +34,94 @@ body {
 
 <body class="p-6 min-h-screen">
 
-<!-- HEADER -->
 <div class="flex justify-between items-center mb-6">
   <h1 class="text-white text-3xl font-bold">Dashboard</h1>
-
   <div>
-    <span id="userEmail" class="text-white"></span>
-    <button id="logoutBtn" class="bg-red-600 text-white px-3 py-2 rounded ml-3">Logout</button>
+    <span id="userEmail" class="text-white mr-3"></span>
+    <button id="logoutBtn" class="bg-red-600 text-white px-3 py-2 rounded">Logout</button>
   </div>
 </div>
 
-<!-- UPLOAD SECTION -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
+  <!-- DOCUMENTS -->
   <div class="glass">
-    <h2>📄 Documents</h2>
-    <input id="docUpload" type="file" class="w-full mb-2"/>
+    <h2 class="font-bold mb-2">Documents</h2>
+    <input id="docUpload" type="file" class="mb-2 w-full">
     <textarea id="docDesc" class="w-full border p-2 mb-2" placeholder="Description"></textarea>
     <button id="uploadDoc" class="bg-blue-600 text-white w-full py-2">Upload</button>
-    <div id="docsList"></div>
+    <div id="docsList" class="mt-3"></div>
   </div>
 
+  <!-- IMAGES -->
   <div class="glass">
-    <h2>🖼 Images</h2>
-    <input id="imgUpload" type="file" accept="image/*" class="w-full mb-2"/>
-    <textarea id="imgDesc" class="w-full border p-2 mb-2" placeholder="Description"></textarea>
+    <h2 class="font-bold mb-2">Images</h2>
+    <input id="imgUpload" type="file" accept="image/*" class="mb-2 w-full">
+    <textarea id="imgDesc" class="w-full border p-2 mb-2"></textarea>
     <button id="uploadImg" class="bg-green-600 text-white w-full py-2">Upload</button>
-    <div id="imagesList"></div>
+    <div id="imagesList" class="mt-3"></div>
   </div>
 
+  <!-- VIDEOS -->
   <div class="glass">
-    <h2>🎥 Videos</h2>
-    <input id="vidUpload" type="file" accept="video/*" class="w-full mb-2"/>
-    <textarea id="vidDesc" class="w-full border p-2 mb-2" placeholder="Description"></textarea>
+    <h2 class="font-bold mb-2">Videos</h2>
+    <input id="vidUpload" type="file" accept="video/*" class="mb-2 w-full">
+    <textarea id="vidDesc" class="w-full border p-2 mb-2"></textarea>
     <button id="uploadVid" class="bg-purple-600 text-white w-full py-2">Upload</button>
-    <div id="videosList"></div>
+    <div id="videosList" class="mt-3"></div>
   </div>
 
 </div>
 
 <!-- MODAL -->
-<div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-  <div class="bg-white p-4 rounded-xl w-full max-w-3xl relative">
-
-    <button id="closePreview" class="absolute right-3 top-2 text-red-600 text-2xl">✖</button>
-
-    <div id="previewContent"></div>
-
+<div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center">
+  <div class="bg-white p-4 w-3/4 relative rounded">
+    <button id="closeModal" class="absolute right-2 top-2 text-red-600 text-xl">✖</button>
+    <div id="modalContent"></div>
   </div>
 </div>
 
 <script type="module">
 const supabase = window.supabase;
 
-let user = null;
-let currentVideo = null;
+// DOM ELEMENTS
+const docUpload = document.getElementById("docUpload");
+const imgUpload = document.getElementById("imgUpload");
+const vidUpload = document.getElementById("vidUpload");
 
-/* ---------- AUTH ---------- */
-(async () => {
+const docDesc = document.getElementById("docDesc");
+const imgDesc = document.getElementById("imgDesc");
+const vidDesc = document.getElementById("vidDesc");
+
+// AUTH CHECK
+let user;
+
+async function init() {
   const { data } = await supabase.auth.getSession();
   user = data.session?.user;
 
-  if (!user) window.location.href = "login.html";
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
 
   document.getElementById("userEmail").innerText = user.email;
   loadFiles();
-})();
+}
 
-/* ---------- LOGOUT ---------- */
+init();
+
+// LOGOUT
 document.getElementById("logoutBtn").onclick = async () => {
   await supabase.auth.signOut();
   window.location.href = "login.html";
 };
 
-/* ---------- FIXED UPLOAD BUTTONS ---------- */
-document.getElementById("uploadImg").onclick = () =>
-  uploadFile("image", imgUpload, imgDesc);
+// UPLOAD FUNCTION
+async function uploadFile(type, input, desc) {
+  if (!input.files.length) return alert("Select file");
 
-document.getElementById("uploadVid").onclick = () =>
-  uploadFile("video", vidUpload, vidDesc);
-
-document.getElementById("uploadDoc").onclick = () =>
-  uploadFile("document", docUpload, docDesc);
-
-/* ---------- UPLOAD FUNCTION ---------- */
-async function uploadFile(type, input, descInput) {
   const file = input.files[0];
-
-  if (!file) return alert("Select file first");
-
   const path = `${user.id}/${Date.now()}-${file.name}`;
 
   const { error } = await supabase.storage
@@ -137,152 +137,82 @@ async function uploadFile(type, input, descInput) {
   await supabase.from("files").insert({
     user_id: user.id,
     name: file.name,
-    description: descInput.value || "",
+    description: desc.value,
     type,
     path,
     url: data.publicUrl
   });
 
   input.value = "";
-  descInput.value = "";
+  desc.value = "";
 
   loadFiles();
 }
 
-/* ---------- LOAD FILES ---------- */
+// BUTTON EVENTS
+document.getElementById("uploadDoc").onclick = () =>
+  uploadFile("document", docUpload, docDesc);
+
+document.getElementById("uploadImg").onclick = () =>
+  uploadFile("image", imgUpload, imgDesc);
+
+document.getElementById("uploadVid").onclick = () =>
+  uploadFile("video", vidUpload, vidDesc);
+
+// LOAD FILES
 async function loadFiles() {
   const { data } = await supabase
     .from("files")
     .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+    .eq("user_id", user.id);
 
-  imagesList.innerHTML = "";
-  videosList.innerHTML = "";
-  docsList.innerHTML = "";
+  document.getElementById("docsList").innerHTML = "";
+  document.getElementById("imagesList").innerHTML = "";
+  document.getElementById("videosList").innerHTML = "";
 
-  data.forEach(row => {
-    const card = document.createElement("div");
-    card.className = "bg-white p-2 rounded shadow mt-2";
+  data.forEach(file => {
+    const div = document.createElement("div");
+    div.className = "bg-white p-2 rounded mb-2";
 
-    // IMAGE
-    if (row.type === "image") {
-      const img = document.createElement("img");
-      img.src = row.url;
-      img.className = "w-full h-40 object-cover rounded cursor-pointer";
-      img.onclick = () => openPreview("image", row.url);
-      card.appendChild(img);
-      imagesList.appendChild(card);
+    if (file.type === "image") {
+      div.innerHTML = `<img src="${file.url}" class="w-full cursor-pointer">`;
+    } else if (file.type === "video") {
+      div.innerHTML = `<video src="${file.url}" class="w-full cursor-pointer"></video>`;
+    } else {
+      div.innerHTML = `<p class="cursor-pointer">${file.name}</p>`;
     }
 
-    // VIDEO
-    if (row.type === "video") {
-      const vid = document.createElement("video");
-      vid.src = row.url;
-      vid.className = "w-full h-40 rounded cursor-pointer";
-      vid.onclick = () => openPreview("video", row.url);
-      card.appendChild(vid);
-      videosList.appendChild(card);
-    }
+    div.onclick = () => openModal(file);
+    
+    const container =
+      file.type === "image"
+        ? document.getElementById("imagesList")
+        : file.type === "video"
+        ? document.getElementById("videosList")
+        : document.getElementById("docsList");
 
-    // DOCUMENT
-    if (row.type === "document") {
-      const p = document.createElement("p");
-      p.innerText = row.name;
-      p.className = "font-semibold cursor-pointer";
-      p.onclick = () => window.open(row.url, "_blank");
-      card.appendChild(p);
-      docsList.appendChild(card);
-    }
-
-    // DESCRIPTION
-    const desc = document.createElement("p");
-    desc.innerText = row.description || "";
-    desc.className = "text-sm text-gray-600";
-    card.appendChild(desc);
-
-    // ACTIONS
-    const actions = document.createElement("div");
-    actions.className = "flex gap-2 mt-2";
-
-    // DOWNLOAD FIXED
-    const dl = document.createElement("button");
-    dl.innerText = "Download";
-    dl.className = "bg-blue-600 text-white px-2 py-1 text-sm rounded";
-
-    dl.onclick = async () => {
-      const res = await fetch(row.url);
-      const blob = await res.blob();
-
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = row.name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      window.URL.revokeObjectURL(url);
-    };
-
-    // DELETE
-    const del = document.createElement("button");
-    del.innerText = "Delete";
-    del.className = "bg-red-600 text-white px-2 py-1 text-sm rounded";
-
-    del.onclick = async () => {
-      await supabase.storage.from("user_files").remove([row.path]);
-      await supabase.from("files").delete().eq("id", row.id);
-      loadFiles();
-    };
-
-    actions.appendChild(dl);
-    actions.appendChild(del);
-    card.appendChild(actions);
+    container.appendChild(div);
   });
 }
 
-/* ---------- MODAL FIX ---------- */
-const modal = document.getElementById("previewModal");
-const content = document.getElementById("previewContent");
+// MODAL OPEN/CLOSE FIXED
+function openModal(file) {
+  const modal = document.getElementById("modal");
+  const content = document.getElementById("modalContent");
 
-function openPreview(type, url) {
-  content.innerHTML = "";
-
-  if (type === "image") {
-    content.innerHTML = `<img src="${url}" class="w-full rounded">`;
-  }
-
-  if (type === "video") {
-    content.innerHTML = `
-      <video id="modalVideo" src="${url}" controls autoplay class="w-full rounded"></video>
-    `;
-    currentVideo = document.getElementById("modalVideo");
-  }
+  content.innerHTML =
+    file.type === "image"
+      ? `<img src="${file.url}" class="w-full">`
+      : file.type === "video"
+      ? `<video src="${file.url}" controls autoplay class="w-full"></video>`
+      : `<iframe src="${file.url}" class="w-full h-[70vh]"></iframe>`;
 
   modal.classList.remove("hidden");
 }
 
-function closeModal() {
-  modal.classList.add("hidden");
-  content.innerHTML = "";
-
-  if (currentVideo) {
-    currentVideo.pause();
-    currentVideo.currentTime = 0;
-    currentVideo = null;
-  }
-}
-
-document.getElementById("closePreview").onclick = closeModal;
-
-modal.addEventListener("click", (e) => {
-  if (e.target === modal) closeModal();
-});
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeModal();
-});
+document.getElementById("closeModal").onclick = () => {
+  document.getElementById("modal").classList.add("hidden");
+};
 </script>
 
 </body>
