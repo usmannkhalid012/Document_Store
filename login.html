@@ -1,35 +1,59 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Login</title>
+  <title>Professional Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gradient-to-br from-blue-100 to-indigo-200 min-h-screen flex items-center justify-center p-4">
 
-  <div class="max-w-md w-full bg-white p-6 rounded-xl shadow-lg">
-    <h1 class="text-2xl font-bold text-center mb-4">Login</h1>
+  <div class="w-full max-w-md">
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      
+      <!-- Logo / Title -->
+      <div class="text-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Welcome Back</h1>
+        <p class="text-gray-500 text-sm">Login to your account</p>
+      </div>
 
-    <input id="email" type="email" placeholder="Email"
-      class="w-full p-2 border rounded mb-3">
+      <!-- Form -->
+      <div class="space-y-4">
+        <div>
+          <label class="text-sm text-gray-600">Email</label>
+          <input id="email" type="email" placeholder="Enter your email"
+            class="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
 
-    <input id="password" type="password" placeholder="Password"
-      class="w-full p-2 border rounded mb-3">
+        <div>
+          <label class="text-sm text-gray-600">Password</label>
+          <input id="password" type="password" placeholder="Enter your password"
+            class="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
 
-    <button id="loginBtn"
-      class="w-full bg-blue-600 text-white py-2 rounded mb-3">
-      Login
-    </button>
+        <button id="loginBtn"
+          class="w-full bg-blue-600 hover:bg-blue-700 transition text-white py-3 rounded-lg font-semibold">
+          Login
+        </button>
+      </div>
 
-    <p class="text-sm text-center">
-      Don’t have an account?
-      <a href="signup.html" class="text-blue-600 underline">Create one</a>
-    </p>
+      <!-- Links -->
+      <div class="text-center mt-5 text-sm">
+        <p>
+          Don’t have an account?
+          <a href="signup.html" class="text-blue-600 font-medium hover:underline">Sign up</a>
+        </p>
+        <p class="mt-2">
+          <a href="reset.html" class="text-gray-500 hover:text-blue-600">Forgot password?</a>
+        </p>
+      </div>
 
-    <p class="text-sm text-center mt-2">
-      <a href="reset.html" class="text-blue-600 underline">Forgot password?</a>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-xs text-gray-500 mt-4">
+      © 2026 Your App. All rights reserved.
     </p>
   </div>
 
@@ -42,11 +66,19 @@
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNndWhoeHpxc3l5cXV2ZHJueW1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA3OTYsImV4cCI6MjA5MTM5Njc5Nn0.BI9xJGVhIiZfyo8ZWtshIKNcqbVjkE074XlbvD4xa3c"
   );
 
-  document.getElementById("loginBtn").onclick = async () => {
+  const btn = document.getElementById("loginBtn");
+
+  btn.onclick = async () => {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    if (!email || !password) return alert("Enter email & password");
+    if (!email || !password) {
+      alert("Please enter email and password");
+      return;
+    }
+
+    btn.innerText = "Logging in...";
+    btn.disabled = true;
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -55,6 +87,8 @@
 
     if (error) {
       alert(error.message);
+      btn.innerText = "Login";
+      btn.disabled = false;
       return;
     }
 
