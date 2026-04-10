@@ -4,23 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
-
 <script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-// ✅ ALWAYS use ANON KEY (NOT secret)
-const SUPABASE_URL = "https://sguhhxzqsyyquvdrnymn.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNndWhoeHpxc3l5cXV2ZHJueW1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA3OTYsImV4cCI6MjA5MTM5Njc5Nn0.BI9xJGVhIiZfyo8ZWtshIKNcqbVjkE074XlbvD4xa3c";
+  const SUPABASE_URL = "https://sguhhxzqsyyquvdrnymn.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNndWhoeHpxc3l5cXV2ZHJueW1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA3OTYsImV4cCI6MjA5MTM5Njc5Nn0.BI9xJGVhIiZfyo8ZWtshIKNcqbVjkE074XlbvD4xa3c"; // replace with your anon key
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-window.supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  window.supabase = supabase; // optional, for global access
 </script>
-
 <script src="https://cdn.tailwindcss.com"></script>
-
 <style>
 body {
-  background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
-  url('download.jpg') center/cover no-repeat fixed;
+  background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('download.jpg') center/cover no-repeat fixed;
   min-height: 100vh;
 }
 .glass {
@@ -31,187 +27,185 @@ body {
 }
 </style>
 </head>
-
 <body class="p-6 min-h-screen">
 
-<div class="flex justify-between items-center mb-6">
-  <h1 class="text-white text-3xl font-bold">Dashboard</h1>
-  <div>
-    <span id="userEmail" class="text-white mr-3"></span>
+<div class="flex flex-col md:flex-row items-center justify-between mb-6">
+  <h1 class="text-white text-3xl font-bold mb-4 md:mb-0">Dashboard</h1>
+  <div class="flex items-center gap-2">
+    <span id="userEmail" class="text-white"></span>
     <button id="logoutBtn" class="bg-red-600 text-white px-3 py-2 rounded">Logout</button>
   </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-  <!-- DOCUMENTS -->
+  <!-- Documents -->
   <div class="glass">
-    <h2 class="font-bold mb-2">Documents</h2>
-    <input id="docUpload" type="file" class="mb-2 w-full">
-    <textarea id="docDesc" class="w-full border p-2 mb-2" placeholder="Description"></textarea>
-    <button id="uploadDoc" class="bg-blue-600 text-white w-full py-2">Upload</button>
-    <div id="docsList" class="mt-3"></div>
+    <h2 class="font-semibold mb-3">📄 Documents</h2>
+    <input id="docUpload" type="file" accept=".pdf,.txt,.doc,.docx" class="mb-2 w-full"/>
+    <textarea id="docDesc" placeholder="Description (optional)" class="w-full border p-2 rounded mb-2"></textarea>
+    <button id="uploadDoc" class="bg-blue-600 text-white px-3 py-2 rounded w-full">Upload Document</button>
+    <div id="docsList" class="mt-4 grid gap-3"></div>
   </div>
 
-  <!-- IMAGES -->
+  <!-- Images -->
   <div class="glass">
-    <h2 class="font-bold mb-2">Images</h2>
-    <input id="imgUpload" type="file" accept="image/*" class="mb-2 w-full">
-    <textarea id="imgDesc" class="w-full border p-2 mb-2"></textarea>
-    <button id="uploadImg" class="bg-green-600 text-white w-full py-2">Upload</button>
-    <div id="imagesList" class="mt-3"></div>
+    <h2 class="font-semibold mb-3">🖼 Images</h2>
+    <input id="imgUpload" type="file" accept="image/*" class="mb-2 w-full"/>
+    <textarea id="imgDesc" placeholder="Description (optional)" class="w-full border p-2 rounded mb-2"></textarea>
+    <button id="uploadImg" class="bg-green-600 text-white px-3 py-2 rounded w-full">Upload Image</button>
+    <div id="imagesList" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
   </div>
 
-  <!-- VIDEOS -->
+  <!-- Videos -->
   <div class="glass">
-    <h2 class="font-bold mb-2">Videos</h2>
-    <input id="vidUpload" type="file" accept="video/*" class="mb-2 w-full">
-    <textarea id="vidDesc" class="w-full border p-2 mb-2"></textarea>
-    <button id="uploadVid" class="bg-purple-600 text-white w-full py-2">Upload</button>
-    <div id="videosList" class="mt-3"></div>
+    <h2 class="font-semibold mb-3">🎥 Videos</h2>
+    <input id="vidUpload" type="file" accept="video/*" class="mb-2 w-full"/>
+    <textarea id="vidDesc" placeholder="Description (optional)" class="w-full border p-2 rounded mb-2"></textarea>
+    <button id="uploadVid" class="bg-purple-600 text-white px-3 py-2 rounded w-full">Upload Video</button>
+    <div id="videosList" class="mt-4 grid gap-3"></div>
   </div>
-
 </div>
 
-<!-- MODAL -->
-<div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center">
-  <div class="bg-white p-4 w-3/4 relative rounded">
-    <button id="closeModal" class="absolute right-2 top-2 text-red-600 text-xl">✖</button>
-    <div id="modalContent"></div>
+<div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-xl p-4 max-w-3xl w-full relative">
+    <button id="closePreview" class="absolute right-3 top-3 text-red-600 text-2xl">✖</button>
+    <div id="previewContent"></div>
   </div>
 </div>
 
 <script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const supabase = window.supabase;
 
-// DOM ELEMENTS
-const docUpload = document.getElementById("docUpload");
-const imgUpload = document.getElementById("imgUpload");
-const vidUpload = document.getElementById("vidUpload");
-
-const docDesc = document.getElementById("docDesc");
-const imgDesc = document.getElementById("imgDesc");
-const vidDesc = document.getElementById("vidDesc");
-
-// AUTH CHECK
-let user;
-
-async function init() {
+// ---------- AUTH GUARD ----------
+let user = null;
+(async function init() {
   const { data } = await supabase.auth.getSession();
   user = data.session?.user;
-
-  if (!user) {
-    window.location.href = "login.html";
-    return;
-  }
-
+  if (!user) return window.location.href = "login.html";
   document.getElementById("userEmail").innerText = user.email;
-  loadFiles();
-}
+  await loadFiles();
+})();
 
-init();
-
-// LOGOUT
+// ---------- LOGOUT ----------
 document.getElementById("logoutBtn").onclick = async () => {
   await supabase.auth.signOut();
   window.location.href = "login.html";
 };
 
-// UPLOAD FUNCTION
-async function uploadFile(type, input, desc) {
-  if (!input.files.length) return alert("Select file");
+// ---------- UPLOAD ----------
+async function handleUpload(type, fileInput, descInput) {
+  if (!user) return;
+  if (!fileInput.files.length) return alert("Select a file");
 
-  const file = input.files[0];
+  const file = fileInput.files[0];
   const path = `${user.id}/${Date.now()}-${file.name}`;
 
-  const { error } = await supabase.storage
-    .from("user_files")
-    .upload(path, file);
+  const { error: uploadError } = await supabase.storage.from("user_files").upload(path, file, { upsert: true });
+  if (uploadError) return alert(uploadError.message);
 
-  if (error) return alert(error.message);
-
-  const { data } = supabase.storage
-    .from("user_files")
-    .getPublicUrl(path);
-
+  const { data } = supabase.storage.from("user_files").getPublicUrl(path);
   await supabase.from("files").insert({
     user_id: user.id,
     name: file.name,
-    description: desc.value,
+    description: descInput.value || "",
     type,
     path,
     url: data.publicUrl
   });
 
-  input.value = "";
-  desc.value = "";
-
-  loadFiles();
+  fileInput.value = "";
+  descInput.value = "";
+  await loadFiles();
 }
 
-// BUTTON EVENTS
-document.getElementById("uploadDoc").onclick = () =>
-  uploadFile("document", docUpload, docDesc);
+document.getElementById("uploadDoc").onclick = () => handleUpload("document", docUpload, docDesc);
+document.getElementById("uploadImg").onclick = () => handleUpload("image", imgUpload, imgDesc);
+document.getElementById("uploadVid").onclick = () => handleUpload("video", vidUpload, vidDesc);
 
-document.getElementById("uploadImg").onclick = () =>
-  uploadFile("image", imgUpload, imgDesc);
-
-document.getElementById("uploadVid").onclick = () =>
-  uploadFile("video", vidUpload, vidDesc);
-
-// LOAD FILES
+// ---------- LOAD FILES ----------
 async function loadFiles() {
-  const { data } = await supabase
-    .from("files")
-    .select("*")
-    .eq("user_id", user.id);
+  if (!user) return;
+  const { data: rows, error } = await supabase.from("files").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+  if (error) return alert(error.message);
 
-  document.getElementById("docsList").innerHTML = "";
-  document.getElementById("imagesList").innerHTML = "";
-  document.getElementById("videosList").innerHTML = "";
+  docsList.innerHTML = imagesList.innerHTML = videosList.innerHTML = "";
 
-  data.forEach(file => {
-    const div = document.createElement("div");
-    div.className = "bg-white p-2 rounded mb-2";
+  rows.forEach(row => {
+    const card = document.createElement("div");
+    card.className = "bg-white p-2 rounded shadow";
 
-    if (file.type === "image") {
-      div.innerHTML = `<img src="${file.url}" class="w-full cursor-pointer">`;
-    } else if (file.type === "video") {
-      div.innerHTML = `<video src="${file.url}" class="w-full cursor-pointer"></video>`;
+    if (row.type === "image") {
+      const img = document.createElement("img");
+      img.src = row.url;
+      img.className = "w-full h-40 object-cover rounded cursor-pointer";
+      img.onclick = () => openPreview("image", row.url);
+      card.appendChild(img);
+    } else if (row.type === "video") {
+      const vid = document.createElement("video");
+      vid.src = row.url;
+      vid.className = "w-full h-40 rounded cursor-pointer";
+      vid.onclick = () => openPreview("video", row.url);
+      card.appendChild(vid);
     } else {
-      div.innerHTML = `<p class="cursor-pointer">${file.name}</p>`;
+      const p = document.createElement("p");
+      p.innerText = row.name;
+      p.className = "font-semibold cursor-pointer";
+      p.onclick = () => openPreview("document", row.url);
+      card.appendChild(p);
     }
 
-    div.onclick = () => openModal(file);
-    
-    const container =
-      file.type === "image"
-        ? document.getElementById("imagesList")
-        : file.type === "video"
-        ? document.getElementById("videosList")
-        : document.getElementById("docsList");
+    const desc = document.createElement("p");
+    desc.innerText = row.description;
+    desc.className = "text-gray-600 text-sm mt-2";
+    card.appendChild(desc);
 
-    container.appendChild(div);
+    const actions = document.createElement("div");
+    actions.className = "flex gap-2 mt-2";
+
+    const dl = document.createElement("button");
+    dl.innerText = "Download";
+    dl.className = "bg-blue-600 text-white px-2 py-1 text-sm rounded";
+    dl.onclick = () => {
+      const a = document.createElement("a");
+      a.href = row.url;
+      a.download = row.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    };
+
+    const del = document.createElement("button");
+    del.innerText = "Delete";
+    del.className = "bg-red-600 text-white px-2 py-1 text-sm rounded";
+    del.onclick = async () => {
+      await supabase.storage.from("user_files").remove([row.path]);
+      await supabase.from("files").delete().eq("id", row.id);
+      await loadFiles();
+    };
+
+    actions.appendChild(dl);
+    actions.appendChild(del);
+    card.appendChild(actions);
+
+    if (row.type === "image") imagesList.appendChild(card);
+    else if (row.type === "video") videosList.appendChild(card);
+    else docsList.appendChild(card);
   });
 }
 
-// MODAL OPEN/CLOSE FIXED
-function openModal(file) {
-  const modal = document.getElementById("modal");
-  const content = document.getElementById("modalContent");
-
-  content.innerHTML =
-    file.type === "image"
-      ? `<img src="${file.url}" class="w-full">`
-      : file.type === "video"
-      ? `<video src="${file.url}" controls autoplay class="w-full"></video>`
-      : `<iframe src="${file.url}" class="w-full h-[70vh]"></iframe>`;
-
-  modal.classList.remove("hidden");
+// ---------- PREVIEW ----------
+function openPreview(type, url) {
+  const previewContent = document.getElementById("previewContent");
+  previewContent.innerHTML = type === "image"
+    ? `<img src="${url}" class="w-full rounded">`
+    : type === "video"
+      ? `<video src="${url}" class="w-full rounded" controls autoplay></video>`
+      : `<iframe src="${url}" class="w-full h-[70vh] rounded border"></iframe>`;
+  document.getElementById("previewModal").classList.remove("hidden");
 }
-
-document.getElementById("closeModal").onclick = () => {
-  document.getElementById("modal").classList.add("hidden");
+document.getElementById("closePreview").onclick = () => {
+  document.getElementById("previewModal").classList.add("hidden");
 };
 </script>
 
