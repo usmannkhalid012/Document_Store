@@ -1,233 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  const SUPABASE_URL = "https://sguhhxzqsyyquvdrnymn.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNndWhoeHpxc3l5cXV2ZHJueW1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA3OTYsImV4cCI6MjA5MTM5Njc5Nn0.BI9xJGVhIiZfyo8ZWtshIKNcqbVjkE074XlbvD4xa3c"; // replace with your anon key
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  <style>
-    body {
-      background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55));
-    }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.80);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-    }
-    h1 {
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
-    }
-  </style>
+  window.supabase = supabase; // optional, for global access
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body {
+  background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('download.jpg') center/cover no-repeat fixed;
+  min-height: 100vh;
+}
+.glass {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(8px);
+  padding: 16px;
+  border-radius: 12px;
+}
+</style>
 </head>
+<body class="p-6 min-h-screen">
 
-<body class="min-h-screen p-6">
+<div class="flex flex-col md:flex-row items-center justify-between mb-6">
+  <h1 class="text-white text-3xl font-bold mb-4 md:mb-0">Dashboard</h1>
+  <div class="flex items-center gap-2">
+    <span id="userEmail" class="text-white"></span>
+    <button id="logoutBtn" class="bg-red-600 text-white px-3 py-2 rounded">Logout</button>
+  </div>
+</div>
 
-<h1 class="text-4xl font-bold text-white mb-8 text-center">
-  Files and Document Store (Supabase)
-</h1>
-
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
   <!-- Documents -->
-  <div class="glass-card p-6 rounded-2xl">
-    <h2 class="text-xl font-semibold mb-2">📄 Documents</h2>
-
-    <input type="file" id="docUpload" class="mb-2" />
-    <textarea id="docDescription" class="w-full p-2 mb-4 border rounded" placeholder="Description"></textarea>
-
-    <button onclick="saveFile('docs','docUpload','docDescription')" class="bg-blue-600 text-white px-4 py-2 rounded-xl">
-      Save Document
-    </button>
-
-    <div id="docList" class="mt-4"></div>
+  <div class="glass">
+    <h2 class="font-semibold mb-3">📄 Documents</h2>
+    <input id="docUpload" type="file" accept=".pdf,.txt,.doc,.docx" class="mb-2 w-full"/>
+    <textarea id="docDesc" placeholder="Description (optional)" class="w-full border p-2 rounded mb-2"></textarea>
+    <button id="uploadDoc" class="bg-blue-600 text-white px-3 py-2 rounded w-full">Upload Document</button>
+    <div id="docsList" class="mt-4 grid gap-3"></div>
   </div>
 
   <!-- Images -->
-  <div class="glass-card p-6 rounded-2xl">
-    <h2 class="text-xl font-semibold mb-2">🖼 Images</h2>
-
-    <input type="file" id="imgUpload" accept="image/*" class="mb-2" />
-    <textarea id="imgDescription" class="w-full p-2 mb-4 border rounded" placeholder="Description"></textarea>
-
-    <button onclick="saveFile('images','imgUpload','imgDescription')" class="bg-green-600 text-white px-4 py-2 rounded-xl">
-      Save Image
-    </button>
-
-    <div id="imgList" class="mt-4"></div>
+  <div class="glass">
+    <h2 class="font-semibold mb-3">🖼 Images</h2>
+    <input id="imgUpload" type="file" accept="image/*" class="mb-2 w-full"/>
+    <textarea id="imgDesc" placeholder="Description (optional)" class="w-full border p-2 rounded mb-2"></textarea>
+    <button id="uploadImg" class="bg-green-600 text-white px-3 py-2 rounded w-full">Upload Image</button>
+    <div id="imagesList" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
   </div>
 
   <!-- Videos -->
-  <div class="glass-card p-6 rounded-2xl">
-    <h2 class="text-xl font-semibold mb-2">🎥 Videos</h2>
-
-    <input type="file" id="vidUpload" accept="video/*" class="mb-2" />
-    <textarea id="vidDescription" class="w-full p-2 mb-4 border rounded" placeholder="Description"></textarea>
-
-    <button onclick="saveFile('videos','vidUpload','vidDescription')" class="bg-red-600 text-white px-4 py-2 rounded-xl">
-      Save Video
-    </button>
-
-    <div id="vidList" class="mt-4"></div>
-  </div>
-
-</div>
-
-<!-- Preview Modal -->
-<div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center p-4 z-50">
-  <div class="glass-card p-6 rounded-2xl max-w-3xl w-full relative">
-    <button onclick="closePreview()" class="absolute top-3 right-3 text-red-600 text-2xl">✖</button>
-    <div id="previewContent" class="mt-6"></div>
+  <div class="glass">
+    <h2 class="font-semibold mb-3">🎥 Videos</h2>
+    <input id="vidUpload" type="file" accept="video/*" class="mb-2 w-full"/>
+    <textarea id="vidDesc" placeholder="Description (optional)" class="w-full border p-2 rounded mb-2"></textarea>
+    <button id="uploadVid" class="bg-purple-600 text-white px-3 py-2 rounded w-full">Upload Video</button>
+    <div id="videosList" class="mt-4 grid gap-3"></div>
   </div>
 </div>
 
-<script>
-/* =========================
-   SUPABASE CONFIG
-========================= */
-const SUPABASE_URL = "https://sguhhxzqsyyquvdrnymn.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNndWhoeHpxc3l5cXV2ZHJueW1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA3OTYsImV4cCI6MjA5MTM5Njc5Nn0.BI9xJGVhIiZfyo8ZWtshIKNcqbVjkE074XlbvD4xa3c";
+<div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-xl p-4 max-w-3xl w-full relative">
+    <button id="closePreview" class="absolute right-3 top-3 text-red-600 text-2xl">✖</button>
+    <div id="previewContent"></div>
+  </div>
+</div>
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const supabase = window.supabase;
 
-/* =========================
-   UPLOAD FILE
-========================= */
-async function saveFile(type, uploadId, descriptionId) {
-  const fileInput = document.getElementById(uploadId);
-  const descInput = document.getElementById(descriptionId);
+// ---------- AUTH GUARD ----------
+let user = null;
+(async function init() {
+  const { data } = await supabase.auth.getSession();
+  user = data.session?.user;
+  if (!user) return window.location.href = "login.html";
+  document.getElementById("userEmail").innerText = user.email;
+  await loadFiles();
+})();
 
-  if (!fileInput.files.length) {
-    alert("Select a file first");
-    return;
-  }
-
-  const file = fileInput.files[0];
-  const description = descInput.value;
-
-  const reader = new FileReader();
-
-  reader.onload = async function (e) {
-    const base64 = e.target.result;
-
-    const { error } = await supabaseClient.from("files").insert([
-      {
-        type,
-        name: file.name,
-        description,
-        data: base64
-      }
-    ]);
-
-    if (error) {
-      console.error(error);
-      alert("Upload failed");
-      return;
-    }
-
-    location.reload();
-  };
-
-  reader.readAsDataURL(file);
-}
-
-/* =========================
-   LOAD FILES
-========================= */
-window.onload = function () {
-  loadFiles("docs", "docList");
-  loadFiles("images", "imgList");
-  loadFiles("videos", "vidList");
+// ---------- LOGOUT ----------
+document.getElementById("logoutBtn").onclick = async () => {
+  await supabase.auth.signOut();
+  window.location.href = "login.html";
 };
 
-async function loadFiles(type, containerId) {
-  const container = document.getElementById(containerId);
+// ---------- UPLOAD ----------
+async function handleUpload(type, fileInput, descInput) {
+  if (!user) return;
+  if (!fileInput.files.length) return alert("Select a file");
 
-  const { data, error } = await supabaseClient
-    .from("files")
-    .select("*")
-    .eq("type", type);
+  const file = fileInput.files[0];
+  const path = `${user.id}/${Date.now()}-${file.name}`;
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+  const { error: uploadError } = await supabase.storage.from("user_files").upload(path, file, { upsert: true });
+  if (uploadError) return alert(uploadError.message);
 
-  container.innerHTML = "";
+  const { data } = supabase.storage.from("user_files").getPublicUrl(path);
+  await supabase.from("files").insert({
+    user_id: user.id,
+    name: file.name,
+    description: descInput.value || "",
+    type,
+    path,
+    url: data.publicUrl
+  });
 
-  data.forEach((file) => {
-    container.innerHTML += `
-      <div class="p-3 bg-white/70 rounded-xl mb-3 shadow">
+  fileInput.value = "";
+  descInput.value = "";
+  await loadFiles();
+}
 
-        ${
-          type === "docs"
-            ? `<p class="font-bold cursor-pointer" onclick="openPreview('document','${file.data}')">${file.name}</p>`
-            : ""
-        }
+document.getElementById("uploadDoc").onclick = () => handleUpload("document", docUpload, docDesc);
+document.getElementById("uploadImg").onclick = () => handleUpload("image", imgUpload, imgDesc);
+document.getElementById("uploadVid").onclick = () => handleUpload("video", vidUpload, vidDesc);
 
-        ${
-          type === "images"
-            ? `<img src="${file.data}" class="w-full h-40 object-cover rounded cursor-pointer" onclick="openPreview('image','${file.data}')"/>`
-            : ""
-        }
+// ---------- LOAD FILES ----------
+async function loadFiles() {
+  if (!user) return;
+  const { data: rows, error } = await supabase.from("files").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+  if (error) return alert(error.message);
 
-        ${
-          type === "videos"
-            ? `<video src="${file.data}" class="w-full h-40 rounded cursor-pointer" onclick="openPreview('video','${file.data}')" muted></video>`
-            : ""
-        }
+  docsList.innerHTML = imagesList.innerHTML = videosList.innerHTML = "";
 
-        <p class="text-sm text-gray-700 mt-2">${file.description || ""}</p>
+  rows.forEach(row => {
+    const card = document.createElement("div");
+    card.className = "bg-white p-2 rounded shadow";
 
-        <button onclick="deleteFile('${file.id}')" class="bg-red-600 text-white px-3 py-1 mt-2 rounded">
-          Delete
-        </button>
-      </div>
-    `;
+    if (row.type === "image") {
+      const img = document.createElement("img");
+      img.src = row.url;
+      img.className = "w-full h-40 object-cover rounded cursor-pointer";
+      img.onclick = () => openPreview("image", row.url);
+      card.appendChild(img);
+    } else if (row.type === "video") {
+      const vid = document.createElement("video");
+      vid.src = row.url;
+      vid.className = "w-full h-40 rounded cursor-pointer";
+      vid.onclick = () => openPreview("video", row.url);
+      card.appendChild(vid);
+    } else {
+      const p = document.createElement("p");
+      p.innerText = row.name;
+      p.className = "font-semibold cursor-pointer";
+      p.onclick = () => openPreview("document", row.url);
+      card.appendChild(p);
+    }
+
+    const desc = document.createElement("p");
+    desc.innerText = row.description;
+    desc.className = "text-gray-600 text-sm mt-2";
+    card.appendChild(desc);
+
+    const actions = document.createElement("div");
+    actions.className = "flex gap-2 mt-2";
+
+    const dl = document.createElement("button");
+    dl.innerText = "Download";
+    dl.className = "bg-blue-600 text-white px-2 py-1 text-sm rounded";
+    dl.onclick = () => {
+      const a = document.createElement("a");
+      a.href = row.url;
+      a.download = row.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    };
+
+    const del = document.createElement("button");
+    del.innerText = "Delete";
+    del.className = "bg-red-600 text-white px-2 py-1 text-sm rounded";
+    del.onclick = async () => {
+      await supabase.storage.from("user_files").remove([row.path]);
+      await supabase.from("files").delete().eq("id", row.id);
+      await loadFiles();
+    };
+
+    actions.appendChild(dl);
+    actions.appendChild(del);
+    card.appendChild(actions);
+
+    if (row.type === "image") imagesList.appendChild(card);
+    else if (row.type === "video") videosList.appendChild(card);
+    else docsList.appendChild(card);
   });
 }
 
-/* =========================
-   DELETE FILE
-========================= */
-async function deleteFile(id) {
-  const { error } = await supabaseClient
-    .from("files")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    alert("Delete failed");
-    return;
-  }
-
-  location.reload();
-}
-
-/* =========================
-   PREVIEW
-========================= */
-function openPreview(type, data) {
-  const box = document.getElementById("previewContent");
-
-  if (type === "image") {
-    box.innerHTML = `<img src="${data}" class="w-full rounded-xl"/>`;
-  } 
-  else if (type === "video") {
-    box.innerHTML = `<video src="${data}" controls autoplay class="w-full rounded-xl"></video>`;
-  } 
-  else {
-    box.innerHTML = `<iframe src="${data}" class="w-full h-[500px] rounded-xl"></iframe>`;
-  }
-
+// ---------- PREVIEW ----------
+function openPreview(type, url) {
+  const previewContent = document.getElementById("previewContent");
+  previewContent.innerHTML = type === "image"
+    ? `<img src="${url}" class="w-full rounded">`
+    : type === "video"
+      ? `<video src="${url}" class="w-full rounded" controls autoplay></video>`
+      : `<iframe src="${url}" class="w-full h-[70vh] rounded border"></iframe>`;
   document.getElementById("previewModal").classList.remove("hidden");
 }
-
-function closePreview() {
+document.getElementById("closePreview").onclick = () => {
   document.getElementById("previewModal").classList.add("hidden");
-}
+};
 </script>
 
 </body>
