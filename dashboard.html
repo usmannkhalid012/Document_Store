@@ -8,8 +8,8 @@
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-const SUPABASE_URL = "https://sguhhxzqsyyquvdrnymn.supabase.co";
-const SUPABASE_KEY = "YOUR_ANON_KEY"; // ❗ never use secret key
+const SUPABASE_URL = "https://YOUR_PROJECT.supabase.co";
+const SUPABASE_KEY = "YOUR_ANON_KEY"; // ❗ NEVER use secret key
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 window.supabase = supabase;
@@ -43,7 +43,7 @@ body {
   </div>
 </div>
 
-<!-- UPLOAD BOXES -->
+<!-- UPLOAD SECTION -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
   <div class="glass">
@@ -59,7 +59,7 @@ body {
     <input id="imgUpload" type="file" accept="image/*" class="w-full mb-2"/>
     <textarea id="imgDesc" class="w-full border p-2 mb-2" placeholder="Description"></textarea>
     <button id="uploadImg" class="bg-green-600 text-white w-full py-2">Upload</button>
-    <div id="imagesList" class="grid gap-2"></div>
+    <div id="imagesList"></div>
   </div>
 
   <div class="glass">
@@ -106,10 +106,21 @@ document.getElementById("logoutBtn").onclick = async () => {
   window.location.href = "login.html";
 };
 
-/* ---------- UPLOAD ---------- */
+/* ---------- FIXED UPLOAD BUTTONS ---------- */
+document.getElementById("uploadImg").onclick = () =>
+  uploadFile("image", imgUpload, imgDesc);
+
+document.getElementById("uploadVid").onclick = () =>
+  uploadFile("video", vidUpload, vidDesc);
+
+document.getElementById("uploadDoc").onclick = () =>
+  uploadFile("document", docUpload, docDesc);
+
+/* ---------- UPLOAD FUNCTION ---------- */
 async function uploadFile(type, input, descInput) {
   const file = input.files[0];
-  if (!file) return alert("Select file");
+
+  if (!file) return alert("Select file first");
 
   const path = `${user.id}/${Date.now()}-${file.name}`;
 
@@ -126,7 +137,7 @@ async function uploadFile(type, input, descInput) {
   await supabase.from("files").insert({
     user_id: user.id,
     name: file.name,
-    description: descInput.value,
+    description: descInput.value || "",
     type,
     path,
     url: data.publicUrl
@@ -137,16 +148,6 @@ async function uploadFile(type, input, descInput) {
 
   loadFiles();
 }
-
-/* ---------- BUTTONS ---------- */
-document.getElementById("uploadImg").onclick = () =>
-  uploadFile("image", imgUpload, imgDesc);
-
-document.getElementById("uploadVid").onclick = () =>
-  uploadFile("video", vidUpload, vidDesc);
-
-document.getElementById("uploadDoc").onclick = () =>
-  uploadFile("document", docUpload, docDesc);
 
 /* ---------- LOAD FILES ---------- */
 async function loadFiles() {
@@ -184,17 +185,17 @@ async function loadFiles() {
       videosList.appendChild(card);
     }
 
-    // DOC
+    // DOCUMENT
     if (row.type === "document") {
       const p = document.createElement("p");
       p.innerText = row.name;
-      p.className = "cursor-pointer font-semibold";
+      p.className = "font-semibold cursor-pointer";
       p.onclick = () => window.open(row.url, "_blank");
       card.appendChild(p);
       docsList.appendChild(card);
     }
 
-    // DESC
+    // DESCRIPTION
     const desc = document.createElement("p");
     desc.innerText = row.description || "";
     desc.className = "text-sm text-gray-600";
@@ -220,6 +221,7 @@ async function loadFiles() {
       document.body.appendChild(a);
       a.click();
       a.remove();
+
       window.URL.revokeObjectURL(url);
     };
 
@@ -240,7 +242,7 @@ async function loadFiles() {
   });
 }
 
-/* ---------- MODAL FIXED ---------- */
+/* ---------- MODAL FIX ---------- */
 const modal = document.getElementById("previewModal");
 const content = document.getElementById("previewContent");
 
