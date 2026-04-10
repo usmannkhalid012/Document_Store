@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+  const SUPABASE_URL = "https://sguhhxzqsyyquvdrnymn.supabase.co";
+  const SUPABASE_KEY = "sb_secret_xYFOGGqiAGtqXxZo73rcww_ZQ6KmKUw"; // replace with your anon key
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  window.supabase = supabase; // optional, for global access
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body {
+  background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('download.jpg') center/cover no-repeat fixed;
+  min-height: 100vh;
+}
+.glass {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(8px);
+  padding: 16px;
+  border-radius: 12px;
+}
+</style>
+</head>
+<body class="p-6 min-h-screen">
+
+<div class="flex flex-col md:flex-row items-center justify-between mb-6">
+  <h1 class="text-white text-3xl font-bold mb-4 md:mb-0">Dashboard</h1>
+  <div class="flex items-center gap-2">
+    <span id="userEmail" class="text-white"></span>
+    <button id="logoutBtn" class="bg-red-600 text-white px-3 py-2 rounded">Logout</button>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Documents -->
+  <div class="glass">
+    <h2 class="font-semibold mb-3">📄 Documents</h2>
+    <input id="docUpload" type="file" accept=".pdf,.txt,.doc,.docx" class="mb-2 w-full"/>
+    <textarea id="docDesc" placeholder="Description (optional)" class="w-full border p-2 rounded mb-2"></textarea>
+    <button id="uploadDoc" class="bg-blue-600 text-white px-3 py-2 rounded w-full">Upload Document</button>
+    <div id="docsList" class="mt-4 grid gap-3"></div>
+  </div>
+
+  <!-- Images -->
+  <div class="glass">
+    <h2 class="font-semibold mb-3">🖼 Images</h2>
+    <input id="imgUpload" type="file" accept="image/*" class="mb-2 w-full"/>
+    <textarea id="imgDesc" placeholder="Description (optional)" class="w-full border p-2 rounded mb-2"></textarea>
+    <button id="uploadImg" class="bg-green-600 text-white px-3 py-2 rounded w-full">Upload Image</button>
+    <div id="imagesList" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+  </div>
+
+  <!-- Videos -->
+  <div class="glass">
+    <h2 class="font-semibold mb-3">🎥 Videos</h2>
+    <input id="vidUpload" type="file" accept="video/*" class="mb-2 w-full"/>
+    <textarea id="vidDesc" placeholder="Description (optional)" class="w-full border p-2 rounded mb-2"></textarea>
+    <button id="uploadVid" class="bg-purple-600 text-white px-3 py-2 rounded w-full">Upload Video</button>
+    <div id="videosList" class="mt-4 grid gap-3"></div>
+  </div>
+</div>
+
+<div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-xl p-4 max-w-3xl w-full relative">
+    <button id="closePreview" class="absolute right-3 top-3 text-red-600 text-2xl">✖</button>
+    <div id="previewContent"></div>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const supabase = window.supabase;
+
+// ---------- AUTH GUARD ----------
+let user = null;
+(async function init() {
+  const { data } = await supabase.auth.getSession();
+  user = data.session?.user;
+  if (!user) return window.location.href = "login.html";
+  document.getElementById("userEmail").innerText = user.email;
+  await loadFiles();
+})();
+
+// ---------- LOGOUT ----------
+document.getElementById("logoutBtn").onclick = async () => {
+  await supabase.auth.signOut();
+  window.location.href = "login.html";
+};
+
+// ---------- UPLOAD ----------
+async function handleUpload(type, fileInput, descInput) {
+  if (!user) return;
+  if (!fileInput.files.length) return alert("Select a file");
+
+  const file = fileInput.files[0];
+  const path = `${user.id}/${Date.now()}-${file.name}`;
+
+  const { error: uploadError } = await supabase.storage.from("user_files").upload(path, file, { upsert: true });
+  if (uploadError) return alert(uploadError.message);
+
+  const { data } = supabase.storage.from("user_files").getPublicUrl(path);
+  await supabase.from("files").insert({
+    user_id: user.id,
+    name: file.name,
+    description: descInput.value || "",
+    type,
+    path,
+    url: data.publicUrl
+  });
+
+  fileInput.value = "";
+  descInput.value = "";
+  await loadFiles();
+}
+
+document.getElementById("uploadDoc").onclick = () => handleUpload("document", docUpload, docDesc);
+document.getElementById("uploadImg").onclick = () => handleUpload("image", imgUpload, imgDesc);
+document.getElementById("uploadVid").onclick = () => handleUpload("video", vidUpload, vidDesc);
+
+// ---------- LOAD FILES ----------
+async function loadFiles() {
+  if (!user) return;
+  const { data: rows, error } = await supabase.from("files").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+  if (error) return alert(error.message);
+
+  docsList.innerHTML = imagesList.innerHTML = videosList.innerHTML = "";
+
+  rows.forEach(row => {
+    const card = document.createElement("div");
+    card.className = "bg-white p-2 rounded shadow";
+
+    if (row.type === "image") {
+      const img = document.createElement("img");
+      img.src = row.url;
+      img.className = "w-full h-40 object-cover rounded cursor-pointer";
+      img.onclick = () => openPreview("image", row.url);
+      card.appendChild(img);
+    } else if (row.type === "video") {
+      const vid = document.createElement("video");
+      vid.src = row.url;
+      vid.className = "w-full h-40 rounded cursor-pointer";
+      vid.onclick = () => openPreview("video", row.url);
+      card.appendChild(vid);
+    } else {
+      const p = document.createElement("p");
+      p.innerText = row.name;
+      p.className = "font-semibold cursor-pointer";
+      p.onclick = () => openPreview("document", row.url);
+      card.appendChild(p);
+    }
+
+    const desc = document.createElement("p");
+    desc.innerText = row.description;
+    desc.className = "text-gray-600 text-sm mt-2";
+    card.appendChild(desc);
+
+    const actions = document.createElement("div");
+    actions.className = "flex gap-2 mt-2";
+
+    const dl = document.createElement("button");
+    dl.innerText = "Download";
+    dl.className = "bg-blue-600 text-white px-2 py-1 text-sm rounded";
+    dl.onclick = () => {
+      const a = document.createElement("a");
+      a.href = row.url;
+      a.download = row.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    };
+
+    const del = document.createElement("button");
+    del.innerText = "Delete";
+    del.className = "bg-red-600 text-white px-2 py-1 text-sm rounded";
+    del.onclick = async () => {
+      await supabase.storage.from("user_files").remove([row.path]);
+      await supabase.from("files").delete().eq("id", row.id);
+      await loadFiles();
+    };
+
+    actions.appendChild(dl);
+    actions.appendChild(del);
+    card.appendChild(actions);
+
+    if (row.type === "image") imagesList.appendChild(card);
+    else if (row.type === "video") videosList.appendChild(card);
+    else docsList.appendChild(card);
+  });
+}
+
+// ---------- PREVIEW ----------
+function openPreview(type, url) {
+  const previewContent = document.getElementById("previewContent");
+  previewContent.innerHTML = type === "image"
+    ? `<img src="${url}" class="w-full rounded">`
+    : type === "video"
+      ? `<video src="${url}" class="w-full rounded" controls autoplay></video>`
+      : `<iframe src="${url}" class="w-full h-[70vh] rounded border"></iframe>`;
+  document.getElementById("previewModal").classList.remove("hidden");
+}
+document.getElementById("closePreview").onclick = () => {
+  document.getElementById("previewModal").classList.add("hidden");
+};
+</script>
+
+</body>
+</html>

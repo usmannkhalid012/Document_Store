@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+  <div class="max-w-md w-full bg-white p-6 rounded-xl shadow-lg">
+    <h1 class="text-2xl font-bold text-center mb-4">Login</h1>
+
+    <input id="email" type="email" placeholder="Email"
+      class="w-full p-2 border rounded mb-3">
+
+    <input id="password" type="password" placeholder="Password"
+      class="w-full p-2 border rounded mb-3">
+
+    <button id="loginBtn"
+      class="w-full bg-blue-600 text-white py-2 rounded mb-3">
+      Login
+    </button>
+
+    <p class="text-sm text-center">
+      Don’t have an account?
+      <a href="signup.html" class="text-blue-600 underline">Create one</a>
+    </p>
+
+    <p class="text-sm text-center mt-2">
+      <a href="reset.html" class="text-blue-600 underline">Forgot password?</a>
+    </p>
+  </div>
+
+<script type="module">
+  import { createClient } 
+    from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+  const supabase = createClient(
+    "https://sguhhxzqsyyquvdrnymn.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNndWhoeHpxc3l5cXV2ZHJueW1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjA3OTYsImV4cCI6MjA5MTM5Njc5Nn0.BI9xJGVhIiZfyo8ZWtshIKNcqbVjkE074XlbvD4xa3c"
+  );
+
+  document.getElementById("loginBtn").onclick = async () => {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    if (!email || !password) return alert("Enter email & password");
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    window.location.href = "dashboard.html";
+  };
+</script>
+
+</body>
+</html>
